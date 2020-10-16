@@ -12,11 +12,10 @@ class App extends React.Component {
     ]
   }
   render(){
-    console.log(this.state.todos)
     return (
       <div className="App">
         <h2>HI From Aghiad</h2>
-        <Todos />
+        <Todos todos={this.state.todos}/>
       </div>
     );
   }
