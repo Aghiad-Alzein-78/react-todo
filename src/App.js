@@ -1,6 +1,8 @@
 import React from 'react';
 import Todos from './components/Todos'
 import './App.css';
+import Header from './components/layout/Header'
+import AddTodo from './components/AddTodo'
 
 class App extends React.Component {
   state = {
@@ -20,11 +22,29 @@ class App extends React.Component {
       })
     })
   }
+
+  delTodo = (id)=>{
+    let todosCopy=this.state.todos
+    todosCopy=todosCopy.filter(todo=>{
+      return todo.id!==id
+    })
+    this.setState({
+      todos:todosCopy
+    })
+  }
+ 
   render(){
     return (
       <div className="App">
-        <h2>List of my Todo list:</h2>
-        <Todos todos={this.state.todos} markComplete={this.markComplete}/>
+        <div className="container">
+          <Header />
+          <AddTodo />
+          <Todos 
+            todos={this.state.todos} 
+            markComplete={this.markComplete} 
+            delTodo={this.delTodo}
+          />
+        </div>
       </div>
     );
   }
