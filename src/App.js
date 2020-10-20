@@ -1,62 +1,86 @@
-import React from 'react';
-import Todos from './components/Todos'
-import './App.css';
-import Header from './components/layout/Header'
-import AddTodo from './components/AddTodo'
-var my_id=4
+import React from "react";
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import Todos from "./components/Todos";
+import "./App.css";
+import Header from "./components/layout/Header";
+import AddTodo from "./components/AddTodo";
+import About from "./components/pages/About";
+import { v4 as uuid } from "uuid";
+import axios from "axios";
+
 class App extends React.Component {
- 
   state = {
-    todos:[
-      {id:1,title:"Take out the trash",completed:false},
-      {id:2,title:"Dinner with wife",completed:false},
-      {id:3,title:"Meeting with my boss",completed:false},
-    ]
+    todos: [],
+  };
+  componentDidMount() {
+    axios
+      .get("https://jsonplaceholder.typicode.com/todos?_limit=10")
+      .then((response) => {
+        this.setState({
+          todos: response.data,
+        });
+      });
   }
-  markComplete=(id)=>{
+  markComplete = (id) => {
     this.setState({
-      todos:this.state.todos.map(todo=>{
-        if(todo.id===id){
-          todo.completed=!todo.completed
+      todos: this.state.todos.map((todo) => {
+        if (todo.id === id) {
+          todo.completed = !todo.completed;
         }
-        return todo
+        return todo;
+      }),
+    });
+  };
+
+  delTodo = (id) => {
+    axios
+      .delete(`https://jsonplaceholder.typicode.com/todos/${id}`)
+      .then(() => {
+        this.setState({
+          todos: [
+            ...this.state.todos.filter((todo) => {
+              return todo.id !== id;
+            }),
+          ],
+        });
+      });
+  };
+
+  addTodo = (title) => {
+    axios
+      .post("https://jsonplaceholder.typicode.com/todos", {
+        title: title,
+        completed: false,
       })
-    })
-  }
-
-  delTodo = (id)=>{
-    let todosCopy=this.state.todos
-    todosCopy=todosCopy.filter(todo=>{
-      return todo.id!==id
-    })
-    this.setState({
-      todos:todosCopy
-    })
-  }
-  
- addTodo=(title)=>{
-  let todosList=this.state.todos
-  todosList.push({id:my_id,title:title,completed:false})
-  my_id++
-  console.log(todosList)
-  this.setState({
-    todos:todosList
-  })
- }
-  render(){
+      .then((res) => {
+        console.log(res.data.id);
+        this.setState({ todos: [...this.state.todos, res.data] });
+      });
+  };
+  render() {
     return (
-      <div className="App">
-        <div className="container">
-          <Header />
-          <AddTodo addTodo={this.addTodo}/>
-          <Todos 
-            todos={this.state.todos} 
-            markComplete={this.markComplete} 
-            delTodo={this.delTodo}
-          />
-
+      <Router>
+        <div className="App">
+          <div className="container">
+            <Header />
+            <Route
+              exact
+              path="/"
+              render={(props) => (
+                <React.Fragment>
+                  <AddTodo addTodo={this.addTodo} />
+                  <Todos
+                    todos={this.state.todos}
+                    markComplete={this.markComplete}
+                    delTodo={this.delTodo}
+                  />
+                </React.Fragment>
+              )}
+            />
+            <Route path="/about" component={About} />
+          </div>
         </div>
-      </div>
+      </Router>
     );
   }
 }
